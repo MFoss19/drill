@@ -38,28 +38,47 @@ public class FixedWidthFormatPlugin extends EasyFormatPlugin<FixedWidthFormatCon
 
   protected static final String DEFAULT_NAME = "fixedwidth";
 
+  /**
+   * FixedWidthReaderFactory Inner Class
+   */
   private static class FixedWidthReaderFactory extends FileReaderFactory {
 
     private final FixedWidthFormatConfig config;
     private final int maxRecords;
 
+    /**
+     * FixedWidthReaderFactory Constructor
+     * @param config Config Object
+     * @param maxRecords Maximum Records Reader will handle
+     */
     public FixedWidthReaderFactory(FixedWidthFormatConfig config, int maxRecords) {
       this.config = config;
       this.maxRecords = maxRecords;
+      System.out.println("FixWidthReaderFactory instantiated");
     }
 
     @Override
     public ManagedReader newReader(FileSchemaNegotiator negotiator) throws EarlyEofException {
-      return new FixedWidthBatchReader(negotiator, config, maxRecords);
+      System.out.println("newReader() is called.");
+      return new FixedWidthBatchReader(negotiator, this.config, this.maxRecords);
     }
   }
 
+  /**
+   * FixedWidthFormatPlugin Constructor
+   * @param name
+   * @param context
+   * @param fsConf
+   * @param storageConfig
+   * @param formatConfig
+   */
   public FixedWidthFormatPlugin(String name,
                                 DrillbitContext context,
                                 Configuration fsConf,
                                 StoragePluginConfig storageConfig,
                                 FixedWidthFormatConfig formatConfig) {
     super(name, easyConfig(fsConf, formatConfig), context, storageConfig, formatConfig);
+    System.out.println("Format Plugin created");
   }
 
   private static EasyFormatConfig easyConfig(Configuration fsConf, FixedWidthFormatConfig pluginConfig) {
@@ -80,6 +99,7 @@ public class FixedWidthFormatPlugin extends EasyFormatPlugin<FixedWidthFormatCon
 
   @Override
   protected void configureScan(FileScanLifecycleBuilder builder, EasySubScan scan) {
+    System.out.println("configureScan() called");
     builder.nullType(Types.optional(TypeProtos.MinorType.VARCHAR));
     builder.readerFactory(new FixedWidthReaderFactory(formatConfig, scan.getMaxRecords()));
   }
