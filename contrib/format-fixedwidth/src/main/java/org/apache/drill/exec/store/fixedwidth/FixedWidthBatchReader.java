@@ -60,7 +60,7 @@ public class FixedWidthBatchReader implements ManagedReader {
     System.out.println("next() called");
 
     while (!this.loader.isFull()) {
-      if (!nextLine(this.loader)) {
+      if (!this.nextLine(this.loader)) {
         return false;
       }
     }
@@ -76,7 +76,7 @@ public class FixedWidthBatchReader implements ManagedReader {
     String line;
 
     try {
-      line = reader.readLine();
+      line = this.reader.readLine();
       if (line == null) {
         return false;
       } else if (line.isEmpty()) {
@@ -91,7 +91,7 @@ public class FixedWidthBatchReader implements ManagedReader {
     }
     // Start the row
     rowWriter.start();
-
+    parseLine(line, writer);
 //    try {
 //      parser.parse(line);
 //      matchedWriter.setBoolean(true);
