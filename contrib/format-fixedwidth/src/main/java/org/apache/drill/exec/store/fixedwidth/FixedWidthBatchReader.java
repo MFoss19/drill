@@ -1,6 +1,5 @@
 package org.apache.drill.exec.store.fixedwidth;
 
-import com.epam.parso.impl.SasFileReaderImpl;
 import org.apache.drill.common.AutoCloseables;
 import org.apache.drill.common.exceptions.CustomErrorContext;
 import org.apache.drill.common.exceptions.UserException;
@@ -14,7 +13,6 @@ import org.apache.drill.exec.record.metadata.SchemaBuilder;
 import org.apache.drill.exec.record.metadata.TupleMetadata;
 import org.apache.drill.shaded.guava.com.google.common.base.Charsets;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.FileSplit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,10 +35,15 @@ public class FixedWidthBatchReader implements ManagedReader {
 
   private int lineNumber;
 
+  /**
+   * FixedWidthBatchReader constructor
+   * @param negotiator File Schema Negotiator
+   * @param config Configuration object
+   * @param maxRecords Maximum number of records
+   */
   public FixedWidthBatchReader(FileSchemaNegotiator negotiator, FixedWidthFormatConfig config, int maxRecords) {
     System.out.println("FixWidthBatchReader creating");
     this.config = config;
-//    this.loader = negotiator.build();
     this.open(negotiator);
     ResultSetLoader setLoader = negotiator.build();
     this.loader = setLoader.writer();
@@ -48,6 +51,10 @@ public class FixedWidthBatchReader implements ManagedReader {
     System.out.println("FixWidthBatchReader created");
   }
 
+  /**
+   * Grab next chunk of the file
+   * @return true if successful
+   */
   @Override
   public boolean next() {
     System.out.println("next() called");
@@ -60,6 +67,11 @@ public class FixedWidthBatchReader implements ManagedReader {
     return true;
   }
 
+  /**
+   * Read in next line
+   * @param rowWriter Row set loader
+   * @return true if successful
+   */
   private boolean nextLine(RowSetLoader rowWriter) {
     String line;
 
@@ -72,7 +84,7 @@ public class FixedWidthBatchReader implements ManagedReader {
       }
     } catch (Exception e) {
       throw UserException.dataReadError(e)
-        .message("Error reading HTTPD file at line number %d", lineNumber)
+        .message("Error reading file at line number %d", lineNumber)
         .addContext(e.getMessage())
         .addContext(errorContext)
         .build(logger);
@@ -103,11 +115,14 @@ public class FixedWidthBatchReader implements ManagedReader {
     return true;
   }
 
+  /**
+   * Close the file
+   */
   @Override
   public void close() {
-    if (fsStream != null){
-      AutoCloseables.closeSilently(fsStream);
-      fsStream = null;
+    if (this.fsStream != null){
+      AutoCloseables.closeSilently(this.fsStream);
+      this.fsStream = null;
     }
   }
 
